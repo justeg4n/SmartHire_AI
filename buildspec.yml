@@ -1,0 +1,43 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo "Logging in to Amazon ECR..."
+      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+      - echo "Pulling existing images for cache..."
+      - docker pull $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$JOB_SUGGESTION_REPO_NAME:latest || true
+      - docker pull $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$CANDIDATE_RANKING_REPO_NAME:latest || true
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - IMAGE_TAG=${COMMIT_HASH:=latest}
+      # Enable BuildKit
+      - export DOCKER_BUILDKIT=1
+  build:
+    commands:
+      - echo "Building the Docker images..."
+      - echo "Building job_suggestion_engine..."
+      - docker build -f iac/lambda/job_suggestion_engine/Dockerfile --platform linux/amd64 --provenance=false --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$JOB_SUGGESTION_REPO_NAME:latest --target=final -t $JOB_SUGGESTION_REPO_NAME:latest iac/lambda/job_suggestion_engine
+      - docker tag $JOB_SUGGESTION_REPO_NAME:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$JOB_SUGGESTION_REPO_NAME:$IMAGE_TAG
+      - docker tag $JOB_SUGGESTION_REPO_NAME:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$JOB_SUGGESTION_REPO_NAME:latest
+      
+      - echo "Building candidate_ranking_engine..."
+      - docker build -f iac/lambda/candidate_ranking_engine/Dockerfile --platform linux/amd64 --provenance=false --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$CANDIDATE_RANKING_REPO_NAME:latest --target=final -t $CANDIDATE_RANKING_REPO_NAME:latest iac/lambda/candidate_ranking_engine
+      - docker tag $CANDIDATE_RANKING_REPO_NAME:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$CANDIDATE_RANKING_REPO_NAME:$IMAGE_TAG
+      - docker tag $CANDIDATE_RANKING_REPO_NAME:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$CANDIDATE_RANKING_REPO_NAME:latest
+  post_build:
+    commands:
+      - echo "Pushing the Docker images..."
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$JOB_SUGGESTION_REPO_NAME:$IMAGE_TAG
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$JOB_SUGGESTION_REPO_NAME:latest
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$CANDIDATE_RANKING_REPO_NAME:$IMAGE_TAG
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$CANDIDATE_RANKING_REPO_NAME:latest
+      
+      - echo "Updating Lambda functions..."
+      - aws lambda update-function-code --function-name $JOB_SUGGESTION_FUNCTION_NAME --image-uri $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$JOB_SUGGESTION_REPO_NAME:$IMAGE_TAG
+      - aws lambda update-function-code --function-name $CANDIDATE_RANKING_FUNCTION_NAME --image-uri $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$CANDIDATE_RANKING_REPO_NAME:$IMAGE_TAG
+      
+      - echo "Deployment completed on `date`"
+
+cache:
+  paths:
+    - '/root/.cache/pip/**/*'

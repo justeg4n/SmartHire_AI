@@ -1,0 +1,15 @@
+.cache
+node_modules
+dist
+build
+.turbo
+.next
+coverage
+public/build
+frontend/dist
+*.log
+.DS_Store
+terraform.tfstate
+terraform.tfstate.backup
+iac/terraform.tfstate
+iac/terraform.tfstate.backup

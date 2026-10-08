@@ -1,0 +1,454 @@
+/* ── Google Fonts: Space Grotesk + Outfit ── */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap');
+
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+
+@custom-variant dark (&:is(.dark *));
+
+/* ═══════════════════════════════════════════
+   NEON PROTOCOL DESIGN SYSTEM
+   Stitch Project: SmartHire AI (779585878804450097)
+   Primary: Electric Teal #0FFFE0
+   Surface: Deep Obsidian #0e0e14
+═══════════════════════════════════════════ */
+
+@theme inline {
+  /* ── Radius: round_four = 4px ── */
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 4px);
+  --radius-xl: calc(var(--radius) + 8px);
+  --radius-2xl: calc(var(--radius) + 12px);
+  --radius-3xl: calc(var(--radius) + 16px);
+  --radius-4xl: calc(var(--radius) + 20px);
+
+  /* ── Fonts ── */
+  --font-sans: 'Outfit', system-ui, sans-serif;
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+
+  /* ── Token mappings ── */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* ── Stitch raw tokens (accessible as CSS vars) ── */
+  --color-surface: var(--neon-surface);
+  --color-surface-container: var(--neon-surface-container);
+  --color-surface-container-low: var(--neon-surface-container-low);
+  --color-surface-container-high: var(--neon-surface-container-high);
+  --color-surface-container-highest: var(--neon-surface-container-highest);
+  --color-surface-bright: var(--neon-surface-bright);
+  --color-primary-dim: var(--neon-primary-dim);
+  --color-primary-container: var(--neon-primary-container);
+  --color-tertiary: var(--neon-tertiary);
+  --color-on-surface-variant: var(--neon-on-surface-variant);
+  --color-outline-variant: var(--neon-outline-variant);
+}
+
+/* ═══ LIGHT MODE (Neon Protocol White) ═══ */
+:root {
+  --radius: 0.5rem; /* round_eight = 8px */
+
+  /* ── Neon Protocol Raw Tokens (Light) ── */
+  --neon-surface: #ffffff;
+  --neon-surface-dim: #f5f5f7;
+  --neon-surface-container-lowest: #ffffff;
+  --neon-surface-container-low: #fafafb;
+  --neon-surface-container: #f2f2f5;
+  --neon-surface-container-high: #ebebed;
+  --neon-surface-container-highest: #e4e4e7;
+  --neon-surface-bright: #ffffff;
+  --neon-surface-variant: #f0f0f3;
+  --neon-primary: #00b8a3; /* Calibrated for light mode contrast */
+  --neon-primary-dim: #00a390;
+  --neon-primary-container: #ccf1ed;
+  --neon-primary-fixed: #00f8da;
+  --neon-on-primary: #ffffff;
+  --neon-on-primary-container: #004d44;
+  --neon-secondary: #5c5c7a;
+  --neon-secondary-container: #e0e0eb;
+  --neon-on-secondary: #ffffff;
+  --neon-on-secondary-container: #2e2e3d;
+  --neon-tertiary: #7000ff;
+  --neon-tertiary-container: #f0e6ff;
+  --neon-on-tertiary: #ffffff;
+  --neon-on-background: #0e0e14;
+  --neon-on-surface: #0e0e14;
+  --neon-on-surface-variant: #5c5c66;
+  --neon-outline: #8e8e9c;
+  --neon-outline-variant: #d4d4dc;
+  --neon-error: #e53935;
+  --neon-error-container: #ffebee;
+  --neon-on-error: #ffffff;
+  --neon-on-error-container: #b71c1c;
+  --neon-inverse-primary: #0fffe0;
+  --neon-inverse-surface: #0e0e14;
+
+  /* ── shadcn Light Mode ── */
+  --background: #ffffff;
+  --foreground: #0e0e14;
+  --card: #ffffff;
+  --card-foreground: #0e0e14;
+  --popover: #ffffff;
+  --popover-foreground: #0e0e14;
+  --primary: #00b8a3;
+  --primary-foreground: #ffffff;
+  --secondary: #f2f2f5;
+  --secondary-foreground: #0e0e14;
+  --muted: #f2f2f5;
+  --muted-foreground: #5c5c66;
+  --accent: #f2f2f5;
+  --accent-foreground: #0e0e14;
+  --destructive: #e53935;
+  --border: #e4e4e7;
+  --input: #e4e4e7;
+  --ring: #00b8a3;
+  --chart-1: #00b8a3;
+  --chart-2: #7000ff;
+  --chart-3: #ff716c;
+  --chart-4: #ac89ff;
+  --chart-5: #0e0e14;
+  --sidebar: #fafafb;
+  --sidebar-foreground: #0e0e14;
+  --sidebar-primary: #00b8a3;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f2f2f5;
+  --sidebar-accent-foreground: #0e0e14;
+  --sidebar-border: #e4e4e7;
+  --sidebar-ring: #00b8a3;
+}
+
+/* ═══ DARK MODE — Neon Protocol ═══ */
+/* ═══ DARK MODE (Neon Protocol Deep Obsidian) ═══ */
+.dark {
+  /* ── Neon Protocol Raw Tokens (Dark) ── */
+  --neon-surface: #0e0e14;
+  --neon-surface-dim: #0e0e14;
+  --neon-surface-container-lowest: #000000;
+  --neon-surface-container-low: #13131a;
+  --neon-surface-container: #191920;
+  --neon-surface-container-high: #1f1f27;
+  --neon-surface-container-highest: #25252e;
+  --neon-surface-bright: #2b2b35;
+  --neon-surface-variant: #25252e;
+  --neon-primary: #0fffe0;
+  --neon-primary-dim: #00e8cc;
+  --neon-primary-container: #09fedf;
+  --neon-primary-fixed: #00f8da;
+  --neon-on-primary: #006659;
+  --neon-on-primary-container: #005d50;
+  --neon-secondary: #dddaf2;
+  --neon-secondary-container: #464557;
+  --neon-on-secondary: #4d4d5f;
+  --neon-on-secondary-container: #d0cee5;
+  --neon-tertiary: #ac89ff;
+  --neon-tertiary-container: #7000ff;
+  --neon-on-tertiary: #290067;
+  --neon-on-background: #f5f2fb;
+  --neon-on-surface: #f5f2fb;
+  --neon-on-surface-variant: #acaab3;
+  --neon-outline: #76747d;
+  --neon-outline-variant: #48474f;
+  --neon-error: #ff716c;
+  --neon-error-container: #9f0519;
+  --neon-on-error: #490006;
+  --neon-on-error-container: #ffa8a3;
+  --neon-inverse-primary: #006b5d;
+  --neon-inverse-surface: #fcf8ff;
+
+  /* ── shadcn Dark Mode ── */
+  --background: #0e0e14;
+  --foreground: #f5f2fb;
+  --card: #191920;
+  --card-foreground: #f5f2fb;
+  --popover: #1f1f27;
+  --popover-foreground: #f5f2fb;
+  --primary: #0fffe0;
+  --primary-foreground: #006659;
+  --secondary: #464557;
+  --secondary-foreground: #d0cee5;
+  --muted: #25252e;
+  --muted-foreground: #acaab3;
+  --accent: #25252e;
+  --accent-foreground: #f5f2fb;
+  --destructive: #ff716c;
+  --border: rgba(72, 71, 79, 0.2);
+  --input: #25252e;
+  --ring: #0fffe0;
+  --chart-1: #0fffe0;
+  --chart-2: #ac89ff;
+  --chart-3: #09fedf;
+  --chart-4: #7000ff;
+  --chart-5: #ff716c;
+  --sidebar: #13131a;
+  --sidebar-foreground: #f5f2fb;
+  --sidebar-primary: #0fffe0;
+  --sidebar-primary-foreground: #006659;
+  --sidebar-accent: #1f1f27;
+  --sidebar-accent-foreground: #f5f2fb;
+  --sidebar-border: rgba(72, 71, 79, 0.15);
+  --sidebar-ring: #0fffe0;
+}
+
+/* ═══ BASE STYLES ═══ */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    font-family: 'Outfit', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Outfit', system-ui, sans-serif;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+}
+
+/* ═══ NEON PROTOCOL UTILITY CLASSES ═══ */
+@layer utilities {
+  /* ── Gradient CTA (primary → primary-dim, 135deg) ── */
+  .gradient-cta {
+    background: linear-gradient(135deg, #0fffe0 0%, #00e8cc 100%);
+    color: #006659;
+  }
+
+  .gradient-cta:hover {
+    background: linear-gradient(135deg, #00e8cc 0%, #09fedf 100%);
+  }
+
+  /* ── Primary Glow (Glow Rise effect for active cards) ── */
+  .glow-primary {
+    box-shadow: 0 0 4px 0 rgba(15, 255, 224, 0.15);
+  }
+
+  .glow-primary-lg {
+    box-shadow:
+      0 0 20px 0 rgba(15, 255, 224, 0.2),
+      0 0 40px 0 rgba(15, 255, 224, 0.08);
+  }
+
+  .glow-primary-sm {
+    box-shadow: 0 0 8px 0 rgba(15, 255, 224, 0.25);
+  }
+
+  /* ── Glassmorphism panels ── */
+  .glass-panel {
+    @apply bg-background/60 border-border/20 backdrop-blur-3xl;
+    border-width: 1px;
+  }
+
+  /* ── Tech Grid background (HUD effect at 5% opacity) ── */
+  .tech-grid {
+    background-image:
+      linear-gradient(var(--primary) 1px, transparent 1px),
+      linear-gradient(90deg, var(--primary) 1px, transparent 1px);
+    background-size: 48px 48px;
+    opacity: 0.05;
+  }
+
+  .tech-grid-sm {
+    background-image:
+      linear-gradient(rgba(15, 255, 224, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(15, 255, 224, 0.03) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  /* ── Ambient void shadow for high-level modals ── */
+  .shadow-void {
+    box-shadow: 0px 24px 48px rgba(0, 0, 0, 0.5);
+  }
+
+  /* ── Ghost border (outline-variant at 20% opacity) ── */
+  .ghost-border {
+    border: 1px solid rgba(72, 71, 79, 0.2);
+  }
+
+  .ghost-border-primary {
+    border: 1px solid rgba(15, 255, 224, 0.2);
+  }
+
+  /* ── Gradient sweep animation (headline shimmer) ── */
+  .animate-gradient-x {
+    animation: gradient-x 3s ease infinite;
+    background-size: 200% 200%;
+  }
+
+  /* ── Tertiary (Purple) accent ── */
+  .text-tertiary {
+    color: #ac89ff;
+  }
+
+  .bg-tertiary {
+    background-color: #7000ff;
+  }
+
+  /* ── Neon text glow ── */
+  .text-glow-primary {
+    text-shadow: 0 0 20px rgba(15, 255, 224, 0.5);
+  }
+
+  /* ── Surface hierarchy helpers ── */
+  .bg-surface {
+    background-color: var(--neon-surface);
+  }
+  .bg-surface-low {
+    background-color: var(--neon-surface-container-low);
+  }
+  .bg-surface-container {
+    background-color: var(--neon-surface-container);
+  }
+  .bg-surface-high {
+    background-color: var(--neon-surface-container-high);
+  }
+  .bg-surface-highest {
+    background-color: var(--neon-surface-container-highest);
+  }
+  .bg-surface-bright {
+    background-color: var(--neon-surface-bright);
+  }
+}
+
+/* ═══ KEYFRAME ANIMATIONS ═══ */
+@keyframes gradient-x {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 4px 0 rgba(15, 255, 224, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 16px 0 rgba(15, 255, 224, 0.4);
+  }
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(0.75);
+  }
+}
+
+@keyframes scan-line {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100vh);
+  }
+}
+
+@layer utilities {
+  .animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  .animate-pulse-dot {
+    animation: pulse-dot 1.5s ease-in-out infinite;
+  }
+}
+
+/* ═══ MARKDOWN STYLES ═══ */
+@layer components {
+  .markdown-body {
+    @apply text-foreground space-y-4;
+  }
+  .markdown-body h1 {
+    @apply mt-6 mb-4 text-2xl font-bold;
+  }
+  .markdown-body h2 {
+    @apply mt-5 mb-3 text-xl font-bold;
+  }
+  .markdown-body h3 {
+    @apply mt-4 mb-2 text-lg font-bold;
+  }
+  .markdown-body p {
+    @apply leading-7;
+  }
+  .markdown-body ul {
+    @apply my-4 list-inside list-disc space-y-1;
+  }
+  .markdown-body ol {
+    @apply my-4 list-inside list-decimal space-y-1;
+  }
+  .markdown-body li {
+    @apply leading-7;
+  }
+  .markdown-body a {
+    @apply text-primary hover:underline;
+  }
+  .markdown-body blockquote {
+    @apply border-muted-foreground/30 text-muted-foreground border-l-4 pl-4 italic;
+  }
+  .markdown-body strong {
+    @apply font-semibold;
+  }
+  .markdown-body code {
+    @apply bg-muted text-foreground rounded px-1.5 py-0.5 font-mono text-sm;
+  }
+  .markdown-body pre {
+    @apply bg-muted my-4 overflow-x-auto rounded-lg p-4;
+  }
+  .markdown-body pre code {
+    @apply bg-transparent p-0;
+  }
+}

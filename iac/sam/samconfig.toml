@@ -1,0 +1,13 @@
+version = 0.1
+
+[default.deploy.parameters]
+stack_name = "smarthire-backend-dev"
+resolve_s3 = true
+s3_prefix = "smarthire-backend-dev"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "ApiStageName=\"dev\" AllowedCorsOrigin=\"https://your-domain.example.com\" VpcSecurityGroupId=\"sg-XXXXXXXXXXXXXXXXX\" PrivateSubnetIdA=\"subnet-XXXXXXXXXXXXXXXXX\" PrivateSubnetIdB=\"subnet-XXXXXXXXXXXXXXXXX\" DbSecretArn=\"arn:aws:secretsmanager:ap-southeast-1:000000000000:secret:smarthire/rds/dev-XXXXXX\" DbResourceId=\"db-XXXXXXXXXXXXXXXXXXXXXXXXXX\" DbUsername=\"smarthire_admin\" CognitoRegion=\"ap-southeast-1\" CognitoUserPoolId=\"ap-southeast-1_XXXXXXXXX\" CognitoClientId=\"XXXXXXXXXXXXXXXXXXXXXXXXXX\" AspNetCoreEnvironment=\"Development\" AdminEmail=\"admin@example.com\""
+image_repositories = []
+
+[default.global.parameters]
+region = "ap-southeast-1"

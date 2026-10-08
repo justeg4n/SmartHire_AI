@@ -1,0 +1,271 @@
+# SmartHire AppSync schema — must stay in sync with resolvers in main.tf and frontend src/lib/appSyncOperations.ts
+
+schema {
+  query: Query
+  mutation: Mutation
+  subscription: Subscription
+}
+
+scalar AWSJSON
+scalar AWSDateTime
+
+# Shared by Query (Cognito), Mutation publish* (IAM), and Subscription — needs both auth modes on the object graph.
+type SalaryRange @aws_cognito_user_pools @aws_iam {
+  min: Float
+  max: Float
+  currency: String
+}
+
+type SkillSummaryOneOfGroup @aws_cognito_user_pools @aws_iam {
+  label: String
+  options: [String]
+}
+
+type SkillSummaryRequired @aws_cognito_user_pools @aws_iam {
+  must: [String]
+  oneOfGroups: [SkillSummaryOneOfGroup]
+  nice: [String]
+}
+
+type SkillSummaryCandidate @aws_cognito_user_pools @aws_iam {
+  normalized: [String]
+  hardSkills: [String]
+  processSkills: [String]
+  softSkills: [String]
+  domainExpertise: [String]
+}
+
+type SkillSummaryBucket @aws_cognito_user_pools @aws_iam {
+  must: [String]
+  oneOf: [String]
+  nice: [String]
+}
+
+type SkillSummaryCoverage @aws_cognito_user_pools @aws_iam {
+  must: Float
+  oneOf: Float
+  nice: Float
+  oneOfSatisfiedCount: Int
+  oneOfTotalCount: Int
+}
+
+type SkillSummaryWeights @aws_cognito_user_pools @aws_iam {
+  must: Float
+  one_of: Float
+  nice: Float
+}
+
+type SkillSummary @aws_cognito_user_pools @aws_iam {
+  schemaVersion: String
+  required: SkillSummaryRequired
+  candidate: SkillSummaryCandidate
+  match: SkillSummaryBucket
+  missing: SkillSummaryBucket
+  coverage: SkillSummaryCoverage
+  weightsApplied: SkillSummaryWeights
+}
+
+type JobSuggestion @aws_cognito_user_pools @aws_iam {
+  jobId: String!
+  jobTitle: String
+  companyName: String
+  finalScore: Float
+  biEncoderScore: Float
+  crossEncoderScore: Float
+  matchExplanation: String
+  requiredSkills: [String]
+  """Skills extracted from the candidate's CV (same list for each job row in the payload)."""
+  candidateSkills: [String]
+  """Structured skill breakdown (new schema — hardSkills+processSkills replaces candidateSkills for matching)."""
+  hardSkills: [String]
+  processSkills: [String]
+  softSkills: [String]
+  domainExpertise: [String]
+  skillGapScore: Float
+  skillCoverageMust: Float
+  skillCoverageOneOf: Float
+  skillCoverageNice: Float
+  skillCompositeScore: Float
+  hybridSemanticScore: Float
+  finalScoreV3: Float
+  mustPenaltyPoints: Float
+  skillSummarySchemaVersion: String
+  skillSummary: SkillSummary
+  seniority: String
+  location: String
+  jobType: String
+  salaryRange: SalaryRange
+}
+
+type JobSuggestionsPayload @aws_cognito_user_pools @aws_iam {
+  candidateId: String!
+  updatedAt: AWSDateTime
+  scoredAt: AWSDateTime
+  suggestionCount: Int
+  pipelineRunId: String
+  scoringVersion: String
+  cvVersion: String
+  suggestions: [JobSuggestion]
+}
+
+"""Same Dynamo item as getJobSuggestions but without unmarshalling suggestion rows — for CV/pipeline status checks."""
+type JobSuggestionsStatusPayload @aws_cognito_user_pools @aws_iam {
+  candidateId: String!
+  hasRecord: Boolean!
+  updatedAt: AWSDateTime
+  scoredAt: AWSDateTime
+  suggestionCount: Int
+  pipelineRunId: String
+  scoringVersion: String
+  cvVersion: String
+}
+
+type CandidateContactInfo {
+  fullName: String
+  email: String
+  phone: String
+  linkedinUrl: String
+  githubUrl: String
+  portfolioUrl: String
+}
+
+type CandidateParsedProfile {
+  headline: String
+  summary: String
+  yearsExperience: Float
+  skills: [String]
+  education: [String]
+  certifications: [String]
+  languages: [String]
+  projects: AWSJSON
+  professionalExperience: AWSJSON
+  domainExperience: [String]
+  seniorityEvidence: [String]
+  recencySignals: AWSJSON
+  strengths: String
+  gaps: String
+}
+
+type CandidateCvStatus {
+  candidateId: String!
+  hasCv: Boolean!
+  status: String
+  parseStatus: String
+  errorMessage: String
+  updatedAt: AWSDateTime
+  cvVersion: String
+  latestCvKey: String
+  latestSuggestionCount: Int
+  latestSuggestionAt: AWSDateTime
+  contactInfo: CandidateContactInfo
+  parsedProfile: CandidateParsedProfile
+}
+
+type CandidateRankingPayload @aws_cognito_user_pools @aws_iam {
+  jobId: String!
+  # JSON list from ranking engine (e.g. contactInfo, scoreBreakdown, evidenceHighlights, schemaVersion).
+  # Internal identity fields are sanitized in resolver response mapping.
+  rankedCandidates: AWSJSON
+  candidateCount: Int
+  updatedAt: AWSDateTime
+  scoredAt: AWSDateTime
+  pipelineRunId: String
+  scoringVersion: String
+  jdVersion: String
+}
+
+"""JOB#id / SK METADATA — recruiter-owned job detail for dashboard."""
+type JobMetadataDetail @aws_cognito_user_pools @aws_iam {
+  jobId: String!
+  jobTitle: String
+  companyName: String
+  jdText: String
+  jdMarkdown: String
+  location: String
+  employmentType: String
+  experienceLevel: String
+  salaryRange: SalaryRange
+  requiredSkills: [String]
+  parseStatus: String
+  status: String
+  updatedAt: AWSDateTime
+}
+
+type RecruiterJobListItem @aws_cognito_user_pools @aws_iam {
+  jobId: String!
+  jobTitle: String
+  companyName: String
+  location: String
+  updatedAt: AWSDateTime
+  parseStatus: String
+  status: String
+}
+
+type RecruiterJobsListPayload @aws_cognito_user_pools @aws_iam {
+  items: [RecruiterJobListItem]
+  nextToken: String
+}
+
+type JobCatalogListItem @aws_cognito_user_pools @aws_iam {
+  jobId: String!
+  jobTitle: String
+  companyName: String
+  location: String
+  employmentType: String
+  experienceLevel: String
+  salaryRange: SalaryRange
+  requiredSkills: [String]
+  parseStatus: String
+  status: String
+  updatedAt: AWSDateTime
+}
+
+type JobCatalogListPayload @aws_cognito_user_pools @aws_iam {
+  items: [JobCatalogListItem]
+  nextToken: String
+}
+
+type Query {
+  getJobSuggestions(candidateId: String!): JobSuggestionsPayload
+  getJobSuggestionsStatus(candidateId: String!): JobSuggestionsStatusPayload
+  getJobSuggestionForCandidate(candidateId: String!, jobId: String!): JobSuggestion
+  getCandidateCvStatus(candidateId: String!): CandidateCvStatus
+  getCandidateProfileForRecruiter(jobId: String!, candidateId: String!): CandidateCvStatus
+  getJobMetadata(jobId: String!): JobMetadataDetail
+  getJobMetadataForCandidate(candidateId: String!, jobId: String!): JobMetadataDetail
+  getCandidateRanking(jobId: String!): CandidateRankingPayload
+  listRecruiterJobs(limit: Int, nextToken: String): RecruiterJobsListPayload
+  listJobCatalog(limit: Int, nextToken: String): JobCatalogListPayload
+}
+
+type Mutation {
+  # Called by Lambdas with SigV4 (additional auth: AWS_IAM). Without @aws_iam, IAM gets Unauthorized.
+  publishJobSuggestions(
+    candidateId: String!
+    suggestions: AWSJSON!
+    updatedAt: AWSDateTime!
+    scoredAt: AWSDateTime
+    pipelineRunId: String
+    scoringVersion: String
+    cvVersion: String
+  ): JobSuggestionsPayload
+    @aws_iam
+  publishCandidateRanking(
+    jobId: String!
+    rankedCandidates: AWSJSON!
+    updatedAt: AWSDateTime!
+    scoredAt: AWSDateTime
+    candidateCount: Int
+    pipelineRunId: String
+    scoringVersion: String
+    jdVersion: String
+  ): CandidateRankingPayload
+    @aws_iam
+}
+
+type Subscription {
+  onJobSuggestions(candidateId: String!): JobSuggestionsPayload
+    @aws_subscribe(mutations: ["publishJobSuggestions"])
+  onCandidateRanking(jobId: String!): CandidateRankingPayload
+    @aws_subscribe(mutations: ["publishCandidateRanking"])
+}

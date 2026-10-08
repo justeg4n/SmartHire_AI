@@ -1,0 +1,170 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: SmartHire API Gateway + Lambda stack (SAM source of truth)
+
+Parameters:
+  ApiStageName:
+    Type: String
+    Default: Prod
+  AllowedCorsOrigin:
+    Type: String
+    Default: https://smarthire-ai.org
+  VpcSecurityGroupId:
+    Type: AWS::EC2::SecurityGroup::Id
+  PrivateSubnetIdA:
+    Type: AWS::EC2::Subnet::Id
+  PrivateSubnetIdB:
+    Type: AWS::EC2::Subnet::Id
+  DbSecretArn:
+    Type: String
+  DbResourceId:
+    Type: String
+  DbUsername:
+    Type: String
+    Default: smarthire_admin
+  CognitoRegion:
+    Type: String
+    Default: ap-southeast-1
+  CognitoUserPoolId:
+    Type: String
+  CognitoClientId:
+    Type: String
+  AspNetCoreEnvironment:
+    Type: String
+    Default: Production
+  AdminEmail:
+    Type: String
+    Default: admin@hirelo.com
+  AdminPassword:
+    Type: String
+    NoEcho: true
+
+Resources:
+  SmartHireApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: !Sub smarthire-api-${ApiStageName}
+      StageName: !Ref ApiStageName
+      EndpointConfiguration: REGIONAL
+      Cors:
+        AllowMethods: "'GET,POST,PUT,PATCH,DELETE,OPTIONS'"
+        AllowHeaders: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+        AllowOrigin: !Sub "'${AllowedCorsOrigin}'"
+        AllowCredentials: true
+      Auth:
+        DefaultAuthorizer: CognitoAuthorizer
+        AddDefaultAuthorizerToCorsPreflight: false
+        Authorizers:
+          CognitoAuthorizer:
+            UserPoolArn: !Sub arn:aws:cognito-idp:${CognitoRegion}:${AWS::AccountId}:userpool/${CognitoUserPoolId}
+            Identity:
+              Header: Authorization
+              ReauthorizeEvery: 0
+      MethodSettings:
+        - ResourcePath: /*
+          HttpMethod: "*"
+          LoggingLevel: INFO
+          DataTraceEnabled: true
+          MetricsEnabled: true
+
+  SmartHireApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../../backend/The Hirelo/
+      Handler: The_Hirelo
+      Runtime: dotnet8
+      MemorySize: 512
+      Timeout: 30
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref VpcSecurityGroupId
+        SubnetIds:
+          - !Ref PrivateSubnetIdA
+          - !Ref PrivateSubnetIdB
+      Environment:
+        Variables:
+          DB_HOST: !Sub "{{resolve:secretsmanager:${DbSecretArn}:SecretString:host}}"
+          DB_PORT: !Sub "{{resolve:secretsmanager:${DbSecretArn}:SecretString:port}}"
+          DB_NAME: !Sub "{{resolve:secretsmanager:${DbSecretArn}:SecretString:dbname}}"
+          DB_USER: !Sub "{{resolve:secretsmanager:${DbSecretArn}:SecretString:username}}"
+          DB_PASSWORD: !Sub "{{resolve:secretsmanager:${DbSecretArn}:SecretString:password}}"
+          AWS__Cognito__Region: !Ref CognitoRegion
+          AWS__Cognito__UserPoolId: !Ref CognitoUserPoolId
+          AWS__Cognito__ClientId: !Ref CognitoClientId
+          ASPNETCORE_ENVIRONMENT: !Ref AspNetCoreEnvironment
+          ADMIN_EMAIL: !Ref AdminEmail
+          ADMIN_PASSWORD: !Ref AdminPassword
+          # CV/JD unified pipeline: backend starts this execution on job create/update.
+          STATE_MACHINE_ARN: !Sub arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:smarthire-cv-processing-${ApiStageName}
+          DYNAMODB_CV_TABLE: !Sub "smarthire-cv-parse-results-${ApiStageName}"
+          DYNAMODB_JD_TABLE: !Sub "smarthire-jd-parse-results-${ApiStageName}"
+          JOB_SUGGESTION_ENGINE_FUNCTION_NAME: !Sub "smarthire-job-suggestion-engine-${ApiStageName}"
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action: rds-db:connect
+              Resource: !Sub arn:aws:rds-db:${AWS::Region}:${AWS::AccountId}:dbuser:${DbResourceId}/${DbUsername}
+            - Effect: Allow
+              Action:
+                - dynamodb:Query
+                - dynamodb:GetItem
+                - dynamodb:Scan
+              Resource: 
+                - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/smarthire-cv-parse-results-*
+                - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/smarthire-jd-parse-results-*
+            - Effect: Allow
+              Action:
+                - states:StartExecution
+              Resource:
+                - !Sub arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:smarthire-cv-processing-${ApiStageName}
+            - Effect: Allow
+              Action:
+                - lambda:InvokeFunction
+              Resource:
+                - !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:smarthire-job-suggestion-engine-${ApiStageName}
+      Events:
+        RootApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SmartHireApi
+            Path: /
+            Method: ANY
+        ProxyApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SmartHireApi
+            Path: /{proxy+}
+            Method: ANY
+
+  # Ensure CORS headers are present even on API Gateway-level error responses
+  # (e.g. 401 Unauthorized, 403 Forbidden, 500 from Lambda cold-start failures)
+  GatewayResponseDefault4XX:
+    Type: AWS::ApiGateway::GatewayResponse
+    Properties:
+      ResponseType: DEFAULT_4XX
+      RestApiId: !Ref SmartHireApi
+      ResponseParameters:
+        gatewayresponse.header.Access-Control-Allow-Origin: !Sub "'${AllowedCorsOrigin}'"
+        gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+        gatewayresponse.header.Access-Control-Allow-Methods: "'GET,POST,PUT,PATCH,DELETE,OPTIONS'"
+        gatewayresponse.header.Access-Control-Allow-Credentials: "'true'"
+
+  GatewayResponseDefault5XX:
+    Type: AWS::ApiGateway::GatewayResponse
+    Properties:
+      ResponseType: DEFAULT_5XX
+      RestApiId: !Ref SmartHireApi
+      ResponseParameters:
+        gatewayresponse.header.Access-Control-Allow-Origin: !Sub "'${AllowedCorsOrigin}'"
+        gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+        gatewayresponse.header.Access-Control-Allow-Methods: "'GET,POST,PUT,PATCH,DELETE,OPTIONS'"
+        gatewayresponse.header.Access-Control-Allow-Credentials: "'true'"
+
+Outputs:
+  ApiId:
+    Description: API Gateway REST API ID
+    Value: !Ref SmartHireApi
+  ApiUrl:
+    Description: API Gateway base URL
+    Value: !Sub https://${SmartHireApi}.execute-api.${AWS::Region}.amazonaws.com/${ApiStageName}/

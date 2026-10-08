@@ -1,0 +1,89 @@
+node_modules/
+frontend/node_modules/
+dist/
+frontend/dist/
+.env
+.env.local
+
+# Backend (.NET) build artifacts
+backend/**/bin/
+backend/**/obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Logs and reports
+*.log
+logs/
+coverage/
+
+# AWS SAM build artifacts
+.aws-sam/
+.sam-cache/
+
+# Terraform local state files
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+
+# Terraform lock file (can be committed for team consistency)
+# .terraform.lock.hcl
+
+# Terraform directory
+.terraform/
+.terraform.lock.hcl
+
+# Terraform variable files (often contain secrets)
+*.tfvars
+*.tfvars.json
+!example.tfvars
+
+# Python
+__pycache__/
+.build/
+*.pyc
+*.pyo
+
+# IDE
+.vscode/
+.idea/
+.vs/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Binary files
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Include override files as they are usually used to override resources locally
+!example_override.tf
+
+# Ignore CLI configuration files
+.terraformrc
+terraform.rc
+
+# Ignore plan files
+*.tfplan
+tfplan
+*.plan
+plan.out
+plan.json
+plan_output.txt
+
+# Ignore lock file
+.terraform.lock.hcl
+.infracost
+*.zip
+.agents
+skills/
+.gitnexus
+.mcp
+.cursor
+.claude
