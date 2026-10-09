@@ -1,4 +1,0 @@
-[submodule "backend"]
-	path = backend
-	url = https://github.com/nphphuc/smart-hire-backend
-	branch = phuc

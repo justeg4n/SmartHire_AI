@@ -108,14 +108,23 @@ Optional pieces in Terraform include **AWS WAF** on CloudFront, **Route 53** + *
 ## Repository layout (high level)
 
 - `frontend/` — SPA source
-- `backend/` — .NET solution consumed by SAM
 - `iac/terraform/` — VPC, RDS, Cognito, processing pipeline, frontend hosting, CI/CD, etc.
 - `iac/sam/` — API Gateway + Lambda API template
 - `iac/lambda/` — Python Lambdas and related assets for the pipeline
-- `docs/` — Architecture and proposal notes (e.g. `docs/architecture-smart-matching.md`, `docs/_index.vi.md`)
+- `docs/` — Architecture notes (`docs/architecture-smart-matching.md`)
+
+The .NET 8 API consumed by SAM is maintained in a separate team repository (`smart-hire-backend`) and is not included here.
+
+All account-specific values (AWS account IDs, ARNs, VPC / subnet / security-group IDs, domains, database credentials) have been replaced with placeholders. Provide your own through `iac/terraform/example.tfvars` → `terraform.tfvars`, `iac/sam/samconfig.toml` and CI/CD secrets.
 
 ---
 
 ## Documentation
 
 For sequence diagrams, GraphQL contract details, and deeper design notes, see **[docs/architecture-smart-matching.md](docs/architecture-smart-matching.md)**.
+
+---
+
+## Team
+
+Built by a five-person team during the **AWS First Cloud AI Journey** internship bootcamp. My role: **AI Engineer** — the AI / intelligence layer (CV–JD processing, embeddings and matching engines, AppSync notifications, AI interview Lambdas). My development history for these components is in [SmartHire_AI_Core](https://github.com/justeg4n/SmartHire_AI_Core).
